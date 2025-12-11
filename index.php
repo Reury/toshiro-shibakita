@@ -1,3 +1,7 @@
+<?php
+ini_set("display_errors", 1);
+header('Content-Type: text/html; charset=iso-8859-1');
+?>
 <html>
 
 <head>
@@ -6,17 +10,15 @@
 <body>
 
 <?php
-ini_set("display_errors", 1);
-header('Content-Type: text/html; charset=iso-8859-1');
 
 
 
 echo 'Versao Atual do PHP: ' . phpversion() . '<br>';
 
-$servername = "54.234.153.24";
-$username = "root";
-$password = "Senha123";
-$database = "meubanco";
+$servername = getenv('DB_HOST') ?: "db";
+$username = getenv('DB_USER') ?: "user";
+$password = getenv('DB_PASSWORD') ?: "secret";
+$database = getenv('DB_NAME') ?: "toshiro_db";
 
 // Criar conexão
 
@@ -28,6 +30,8 @@ if (mysqli_connect_errno()) {
     printf("Connect failed: %s\n", mysqli_connect_error());
     exit();
 }
+
+printf("Connected successfully to database: %s<br>", $database);
 
 $valor_rand1 =  rand(1, 999);
 $valor_rand2 = strtoupper(substr(bin2hex(random_bytes(4)), 1));

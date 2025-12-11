@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # 1. Serviço da Aplicação PHP
+  app:
+    build:
+      context: .
+      dockerfile: dockerfile # Usa o arquivo 'dockerfile' que já está no repositório
+    container_name: toshiro-app
+    volumes:
+      - .:/var/www/html # Monta o código-fonte
+    networks:
+      - toshiro-network
+    # Variáveis de ambiente (ajuste conforme necessário)
+    environment:
+      - DB_HOST=db
+      - DB_NAME=toshiro_db
+      - DB_USER=user
+      - DB_PASSWORD=secret
+
+  # 2. Serviço do Servidor Web Nginx
+  web:
+    image: nginx:latest
+    container_name: toshiro-web
+    ports:
+      - "8080:80" # Acessível em http://localhost:8080
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf # Usa o 'nginx.conf'
+      - .:/var/www/html
+    depends_on:
+      - app
+    networks:
+      - toshiro-network
+
+  # 3. Serviço do Banco de Dados
+  db:
+    image: mysql:5.7 # Versão comum para aplicações PHP mais antigas
+    container_name: toshiro-db
+    volumes:
+      - dbdata:/var/lib/mysql # Persistência dos dados
+      - ./banco.sql:/docker-entrypoint-initdb.d/banco.sql # Inicializa com o script SQL
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: toshiro_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: secret
+    networks:
+      - toshiro-network
+
+# Redes e Volumes
+networks:
+  toshiro-network:
+    driver: bridge
+
+volumes:
+  dbdata:
